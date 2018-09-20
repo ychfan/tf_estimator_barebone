@@ -93,6 +93,17 @@ if __name__ == '__main__':
       help='Random seed for TensorFlow',
       default=None,
       type=int)
+  # Performance tuning parameters
+  parser.add_argument(
+      '--allow-growth',
+      help='Whether to enable allow_growth in GPU_Options',
+      default=False,
+      type=bool)
+  parser.add_argument(
+      '--xla',
+      help='Whether to enable XLA auto-jit compilation',
+      default=False,
+      type=bool)
 
   args, _ = parser.parse_known_args()
 
@@ -122,9 +133,15 @@ if __name__ == '__main__':
       params=hparams,
   )
 
+  session_config = tf.ConfigProto()
+  session_config.gpu_options.allow_growth = args.allow_growth
+  if args.xla:
+    session_config.graph_options.optimizer_options.global_jit_level = (
+        tf.OptimizerOptions.ON_1)
   run_config = tf.estimator.RunConfig(
       model_dir=hparams.job_dir,
       tf_random_seed=hparams.random_seed,
+      session_config=session_config,
   )
   estimator = tf.estimator.Estimator(
       model_fn=model_fn,
