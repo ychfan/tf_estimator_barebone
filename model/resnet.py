@@ -136,9 +136,17 @@ def model_fn(features, labels, mode, params, config):
         onehot_labels=labels_onehot,
         logits=logits,
         reduction=tf.losses.Reduction.MEAN)
+    accuracy = tf.reduce_mean(
+        tf.cast(
+            tf.equal(predictions, tf.argmax(labels_onehot, axis=-1)),
+            tf.float32))
   else:
     loss = tf.losses.sparse_softmax_cross_entropy(
         labels=labels, logits=logits, reduction=tf.losses.Reduction.MEAN)
+    accuracy = tf.reduce_mean(
+        tf.cast(tf.equal(predictions, labels), tf.float32))
+  tf.summary.scalar('cross_entropy', loss)
+  tf.summary.scalar('accuracy', accuracy)
 
   reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
   loss = tf.add_n([loss] + reg_losses)
