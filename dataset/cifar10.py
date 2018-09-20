@@ -37,7 +37,7 @@ def update_argparser(parser):
   )
 
 
-def __extract(mode, params):
+def _extract(mode, params):
   if not os.path.exists(LOCAL_DIR):
     os.makedirs(LOCAL_DIR)
   if not os.path.exists(LOCAL_DIR + ARCHIVE_NAME):
@@ -74,17 +74,17 @@ def __extract(mode, params):
   all_images = np.concatenate(all_images)
   all_labels = np.concatenate(all_labels)
 
-  def __generator(all_images, all_labels):
+  def _generator(all_images, all_labels):
     for image, label in zip(all_images, all_labels):
       yield image, label
 
   return tf.data.Dataset.from_generator(
-      generator=lambda: __generator(all_images, all_labels),
+      generator=lambda: _generator(all_images, all_labels),
       output_types=(tf.uint8, tf.int64),
   )
 
 
-def __transform(mode, image, label):
+def _transform(mode, image, label):
   image = tf.to_float(image)
   image = tf.reshape(image, [IMAGE_SIZE, IMAGE_SIZE, 3])
 
@@ -105,4 +105,4 @@ def __transform(mode, image, label):
 
 
 input_fn = lambda mode, params: (
-    input_fn_tplt(mode, params, __extract, __transform))
+    input_fn_tplt(mode, params, _extract, _transform))

@@ -11,11 +11,11 @@ def update_argparser(parser):
   pass
 
 
-def __extract(mode, params):
+def _extract(mode, params):
   raise NotImplementedError
 
 
-def __transform(mode, image, label):
+def _transform(mode, image, label):
   raise NotImplementedError
 
 
@@ -43,4 +43,4 @@ def input_fn_tplt(mode, params, extract, transform):
   return features, labels
 
 input_fn = lambda mode, params: (
-    input_fn_tplt(mode, params, __extract, __transform))
+    input_fn_tplt(mode, params, _extract, _transform))

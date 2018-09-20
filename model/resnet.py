@@ -37,20 +37,20 @@ def model_fn(features, labels, mode, params, config):
     labels_onehot = labels_lambda * labels_onehot + (
         1 - labels_lambda) * labels_onehot_aux
 
-  def __resnet(x, training):
+  def _resnet(x, training):
     kernel_init = tf.variance_scaling_initializer(
         scale=1.0 / 3, mode='fan_in', distribution='uniform')
     weight_decay = tf.train.exponential_decay(0.0002, global_step, 480000, 0.2,
                                               True)
     kernel_reg = tf.contrib.layers.l2_regularizer(weight_decay)
 
-    def __bn_relu(x, training):
+    def _bn_relu(x, training):
       x = tf.layers.batch_normalization(
           x, axis=1, training=training, fused=True)
       x = tf.nn.relu(x)
       return x
 
-    def __residual_block(x, num_channels, pooling, training):
+    def _residual_block(x, num_channels, pooling, training):
       skip = x
       if pooling:
         stride = 2
@@ -58,7 +58,7 @@ def model_fn(features, labels, mode, params, config):
       else:
         stride = 1
       with tf.variable_scope('act0'):
-        x = __bn_relu(x, training)
+        x = _bn_relu(x, training)
       x = tf.layers.conv2d(
           x,
           num_channels,
@@ -71,7 +71,7 @@ def model_fn(features, labels, mode, params, config):
           name='conv0',
       )
       with tf.variable_scope('act1'):
-        x = __bn_relu(x, training)
+        x = _bn_relu(x, training)
       x = tf.layers.conv2d(
           x,
           num_channels,
@@ -105,17 +105,17 @@ def model_fn(features, labels, mode, params, config):
     with tf.variable_scope('stage1'):
       for i in range(n):
         with tf.variable_scope('layer{}'.format(i)):
-          x = __residual_block(x, 16, i == n - 1, training)
+          x = _residual_block(x, 16, i == n - 1, training)
     with tf.variable_scope('stage2'):
       for i in range(n):
         with tf.variable_scope('layer{}'.format(i)):
-          x = __residual_block(x, 32, i == n - 1, training)
+          x = _residual_block(x, 32, i == n - 1, training)
     with tf.variable_scope('stage3'):
       for i in range(n):
         with tf.variable_scope('layer{}'.format(i)):
-          x = __residual_block(x, 64, False, training)
+          x = _residual_block(x, 64, False, training)
     with tf.variable_scope('fc'):
-      x = __bn_relu(x, training)
+      x = _bn_relu(x, training)
       x = tf.reduce_mean(x, [-1, -2])
       x = tf.layers.dense(
           x,
@@ -127,7 +127,7 @@ def model_fn(features, labels, mode, params, config):
 
   global_step = tf.train.get_or_create_global_step()
 
-  logits = __resnet(images, mode == tf.estimator.ModeKeys.TRAIN)
+  logits = _resnet(images, mode == tf.estimator.ModeKeys.TRAIN)
 
   predictions = tf.argmax(logits, axis=-1)
 
