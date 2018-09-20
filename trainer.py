@@ -118,8 +118,7 @@ if __name__ == '__main__':
   model_module.update_argparser(parser)
   dataset_module = importlib.import_module('dataset.' + args.dataset)
   dataset_module.update_argparser(parser)
-  args = parser.parse_args()
-  hparams = tf.contrib.training.HParams(**args.__dict__)
+  hparams = parser.parse_args()
   print(hparams)
 
   model_fn = getattr(model_module, 'model_fn')
@@ -153,25 +152,11 @@ if __name__ == '__main__':
   train_spec = tf.estimator.TrainSpec(
       input_fn=train_input_fn,
       max_steps=hparams.train_steps,
-      hooks=[
-          # tf.train.SummarySaverHook(
-          #     save_secs=1000,
-          #     output_dir=hparams.job_dir,
-          #     scaffold=tf.train.Scaffold(summary_op=tf.summary.merge_all()),
-          # ),
-      ],
   )
   eval_spec = tf.estimator.EvalSpec(
       input_fn=eval_input_fn,
       steps=hparams.eval_steps,
       name=None,
-      hooks=[
-          # tf.train.SummarySaverHook(
-          #     save_steps=1,
-          #     output_dir=hparams.job_dir,
-          #     scaffold=tf.train.Scaffold(summary_op=tf.summary.merge_all()),
-          # ),
-      ],
       exporters=None,
       throttle_secs=hparams.eval_throttle_secs,
   )
