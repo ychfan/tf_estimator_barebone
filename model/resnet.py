@@ -1,13 +1,17 @@
+"""ResNet model for CIFAR-10 dataset
+"""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
 
-from . import *
+import model
 
 
 def update_argparser(parser):
+  model.update_argparser(parser)
   parser.add_argument(
       '--num-layers',
       help='Number of layers in networks',
@@ -18,14 +22,19 @@ def update_argparser(parser):
       help='Hyper parameter for mixup training',
       default=0.0,
       type=float)
+  parser.set_defaults(
+      train_steps=150000,
+      learning_rate=((32000, 48000, 120000), (0.1, 0.01, 0.001, 0.0002)),
+      save_checkpoints_steps=5000,
+  )
 
 
 def model_fn(features, labels, mode, params, config):
-  images = features["image"]
+  images = features['image']
   if mode != tf.estimator.ModeKeys.PREDICT:
-    labels = labels["label"]
+    labels = labels['label']
   if params.mixup > 0.0 and mode == tf.estimator.ModeKeys.TRAIN:
-    labels_onehot = tf.one_hot(labels, params.output_shape)
+    labels_onehot = tf.one_hot(labels, params.num_classes)
     images_aux = tf.reverse(images, [0])
     labels_onehot_aux = tf.reverse(labels_onehot, [0])
     beta = tf.distributions.Beta(params.mixup, params.mixup)
@@ -89,7 +98,7 @@ def model_fn(features, labels, mode, params, config):
       return x + skip
 
     x = tf.transpose(x, [0, 3, 1, 2])
-    with tf.variable_scope("input"):
+    with tf.variable_scope('input'):
       x = tf.layers.conv2d(
           x,
           16,
@@ -119,7 +128,7 @@ def model_fn(features, labels, mode, params, config):
       x = tf.reduce_mean(x, [-1, -2])
       x = tf.layers.dense(
           x,
-          params.output_shape,
+          params.num_classes,
           kernel_initializer=tf.random_normal_initializer(stddev=1e-3),
           kernel_regularizer=kernel_reg,
       )
@@ -162,8 +171,8 @@ def model_fn(features, labels, mode, params, config):
     train_op = None
 
   eval_metrics = {
-      "accuracy": tf.metrics.accuracy(labels, predictions),
-      #"top_5_accuracy": tf.metrics.mean(tf.nn.in_top_k(logits, labels, 5)),
+      'accuracy': tf.metrics.accuracy(labels, predictions),
+      #'top_5_accuracy': tf.metrics.mean(tf.nn.in_top_k(logits, labels, 5)),
   }
 
   return tf.estimator.EstimatorSpec(
