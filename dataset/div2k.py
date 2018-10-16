@@ -146,22 +146,13 @@ input_fn = lambda mode, params: (
 
 
 def predict_input_fn():
-  serialized_tf_example = tf.placeholder(
-      dtype=tf.string, shape=[], name='input_example_tensor')
-  feature_spec = {
-      'image/encoded': tf.FixedLenFeature(shape=[], dtype=tf.string),
-  }
-  parsed_tf_example = tf.parse_single_example(serialized_tf_example,
-                                              feature_spec)
-  image_encoded = parsed_tf_example['image/encoded']
-  image = tf.image.decode_png(image_encoded, channels=NUM_CHANNELS)
-  image = tf.image.convert_image_dtype(image, tf.float32)
-  features = {'source': tf.expand_dims(image, axis=0)}
+  input_tensor = tf.placeholder(
+      dtype=tf.float32, shape=[None, None, None, 3], name='input_tensor')
+  features = {'source': input_tensor}
   return tf.estimator.export.ServingInputReceiver(
       features=features,
       receiver_tensors={
-          tf.saved_model.signature_constants.REGRESS_INPUTS:
-              serialized_tf_example
+          tf.saved_model.signature_constants.PREDICT_INPUTS: input_tensor
       })
 
 
@@ -173,6 +164,11 @@ def test_saved_model():
       '--input-dir', help='GCS location to load input images', required=True)
   parser.add_argument(
       '--output-dir', help='GCS location to load output images', required=True)
+  parser.add_argument(
+      '--ensemble',
+      help='Whether to ensemble with 8x rotation and flip',
+      default=False,
+      action='store_true')
   args = parser.parse_args()
 
   with tf.Session(graph=tf.Graph()) as sess:
@@ -183,22 +179,47 @@ def test_saved_model():
     input_tensor = sess.graph.get_tensor_by_name(
         signature_def.inputs['inputs'].name)
     output_tensor = sess.graph.get_tensor_by_name(
-        signature_def.outputs['outputs'].name)
+        signature_def.outputs['output'].name)
     if not os.path.isdir(args.output_dir):
       os.mkdir(args.output_dir)
     for input_file in os.listdir(args.input_dir):
       print(input_file)
       output_file = os.path.join(args.output_dir, input_file)
       input_file = os.path.join(args.input_dir, input_file)
-      with open(input_file, 'rb') as f:
-        input_image = f.read()
-      image_encoded = tf.train.Feature(
-          bytes_list=tf.train.BytesList(value=[input_image]))
-      example = tf.train.Example(
-          features=tf.train.Features(feature={'image/encoded': image_encoded}))
-      output_image = output_tensor.eval(
-          feed_dict={input_tensor: example.SerializeToString()})
-      output_image = np.around(output_image[0] * 255.0).astype(np.uint8)
+      input_image = np.asarray(Image.open(input_file))
+
+      def forward_images(images):
+        images = images.astype(np.float32) / 255.0
+        output_tensor.eval(feed_dict={input_tensor: images})
+        return images
+
+      if args.ensemble:
+
+        def flip(image):
+          images = [image]
+          images.append(image[::-1, :, :])
+          images.append(image[:, ::-1, :])
+          images.append(image[::-1, ::-1, :])
+          images = np.stack(images)
+          return images
+
+        def mean_of_flipped(images):
+          image = (images[0] + images[1, ::-1, :, :] + images[2, :, ::-1, :] +
+                   images[3, ::-1, ::-1, :]) * 0.25
+          return image
+
+        rotate = lambda images: np.swapaxes(images, 1, 2)
+
+        input_images = flip(input_image)
+        output_image1 = mean_of_flipped(forward_images(input_images))
+        output_image2 = mean_of_flipped(
+            rotate(forward_images(rotate(input_images))))
+        output_image = (output_image1 + output_image2) * 0.5
+      else:
+        input_images = np.expand_dims(input_image, axis=0)
+        output_images = forward_images(input_images)
+        output_image = output_images[0]
+      output_image = np.around(output_image * 255.0).astype(np.uint8)
       output_image = Image.fromarray(output_image, 'RGB')
       output_image.save(output_file)
 

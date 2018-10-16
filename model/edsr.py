@@ -99,8 +99,8 @@ def model_fn(features, labels, mode, params, config):
 
   if mode == tf.estimator.ModeKeys.PREDICT:
     export_outputs = {
-        tf.saved_model.signature_constants.REGRESS_METHOD_NAME:
-            tf.estimator.export.RegressionOutput(predictions)
+        tf.saved_model.signature_constants.PREDICT_METHOD_NAME:
+            tf.estimator.export.PredictOutput(predictions)
     }
   else:
     hr = labels['target']
