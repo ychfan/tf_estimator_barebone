@@ -12,22 +12,26 @@ import model
 
 def update_argparser(parser):
   model.update_argparser(parser)
-  parser.add_argument(
-      '--num-blocks',
-      help='Number of residual blocks in networks',
-      default=16,
-      type=int)
-  parser.add_argument(
-      '--num-residual-units',
-      help='Number of residual units in networks',
-      default=64,
-      type=int)
-  parser.set_defaults(
-      train_steps=1500000,
-      learning_rate=((1000000,), (1e-4, 5e-5)),
-      save_checkpoints_steps=50000,
-      save_summary_steps=10000,
-  )
+  args, _ = parser.parse_known_args()
+  if args.dataset == 'div2k':
+    parser.add_argument(
+        '--num-blocks',
+        help='Number of residual blocks in networks',
+        default=16,
+        type=int)
+    parser.add_argument(
+        '--num-residual-units',
+        help='Number of residual units in networks',
+        default=64,
+        type=int)
+    parser.set_defaults(
+        train_steps=1500000,
+        learning_rate=((1000000,), (1e-4, 5e-5)),
+        save_checkpoints_steps=50000,
+        save_summary_steps=10000,
+    )
+  else:
+    raise NotImplementedError('Needs to tune hyper parameters for new dataset.')
 
 
 def model_fn(features, labels, mode, params, config):
