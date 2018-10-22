@@ -190,7 +190,7 @@ def test_saved_model():
 
       def forward_images(images):
         images = images.astype(np.float32) / 255.0
-        output_tensor.eval(feed_dict={input_tensor: images})
+        images = output_tensor.eval(feed_dict={input_tensor: images})
         return images
 
       if args.ensemble:
