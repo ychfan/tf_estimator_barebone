@@ -12,21 +12,25 @@ import model
 
 def update_argparser(parser):
   model.update_argparser(parser)
-  parser.add_argument(
-      '--num-layers',
-      help='Number of layers in networks',
-      default=110,
-      type=int)
-  parser.add_argument(
-      '--mixup',
-      help='Hyper parameter for mixup training',
-      default=0.0,
-      type=float)
-  parser.set_defaults(
-      train_steps=150000,
-      learning_rate=((32000, 48000, 120000), (0.1, 0.01, 0.001, 0.0002)),
-      save_checkpoints_steps=5000,
-  )
+  args, _ = parser.parse_known_args()
+  if args.dataset == 'cifar10':
+    parser.add_argument(
+        '--num-layers',
+        help='Number of layers in networks',
+        default=110,
+        type=int)
+    parser.add_argument(
+        '--mixup',
+        help='Hyper parameter for mixup training',
+        default=0.0,
+        type=float)
+    parser.set_defaults(
+        train_steps=150000,
+        learning_rate=((32000, 48000, 120000), (0.1, 0.01, 0.001, 0.0002)),
+        save_checkpoints_steps=5000,
+    )
+  else:
+    raise NotImplementedError('Needs to tune hyper parameters for new dataset.')
 
 
 def model_fn(features, labels, mode, params, config):
@@ -167,6 +171,8 @@ def model_fn(features, labels, mode, params, config):
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
       train_op = opt.minimize(loss, global_step=global_step)
+    stats = tf.profiler.profile()
+    print("Total parameters:", stats.total_parameters)
   else:
     train_op = None
 
