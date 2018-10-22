@@ -25,7 +25,7 @@ conda install tensorflow-gpu pillow
 
 ### Inference
 ```bash
-python -m dataset.div2k --model-dir MODEL_DIR --input-dir INPUT_DIR --output-dir OUTPUT_DIR
+python -m datasets.div2k --model-dir MODEL_DIR --input-dir INPUT_DIR --output-dir OUTPUT_DIR
 ```
 
 ### EDSR
@@ -46,7 +46,8 @@ python trainer.py --dataset div2k --model wdsr --job-dir ./div2k_wdsr
 
 ### Performance
 Compare with [WDSR (PyTorch-based)](https://github.com/JiahuiYu/wdsr_ntire2018#overall-performance)
+
 | Network | Parameters | DIV2K (val) PSNR | Pre-trained models |
 | - | - | - | - |
-| EDSR Baseline | 1,191,324 | 34.63 | [Download](https://github.com/ychfan/tf_estimator_barebone/files/2502372/edsr.zip)
-| WDSR Baseline | 1,190,100 | 34.78 | [Download](https://github.com/ychfan/tf_estimator_barebone/files/2502414/wdsr.zip)
+| EDSR Baseline | 1,191,324 | 34.63 | [Download](https://github.com/ychfan/tf_estimator_barebone/files/2502372/edsr.zip) |
+| WDSR Baseline | 1,190,100 | 34.78 | [Download](https://github.com/ychfan/tf_estimator_barebone/files/2502414/wdsr.zip) |

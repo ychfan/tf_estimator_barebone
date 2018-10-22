@@ -12,7 +12,7 @@ import numpy as np
 
 import tensorflow as tf
 
-import dataset
+import datasets
 
 REMOTE_URL = 'http://data.vision.ee.ethz.ch/cvl/DIV2K/'
 TRAIN_LR_ARCHIVE_NAME = lambda s: 'DIV2K_train_LR_bicubic_X{}.zip'.format(s)
@@ -28,7 +28,7 @@ NUM_CHANNELS = 3
 
 
 def update_argparser(parser):
-  dataset.update_argparser(parser)
+  datasets.update_argparser(parser)
   parser.add_argument(
       '--scale', help='Scale for image super-resolution', default=2, type=int)
   parser.add_argument(
@@ -142,7 +142,7 @@ def _transform(dataset, mode, params):
 
 
 input_fn = lambda mode, params: (
-    dataset.input_fn_tplt(mode, params, extract=_extract, transform=_transform))
+    datasets.input_fn_tplt(mode, params, extract=_extract, transform=_transform))
 
 
 def predict_input_fn():

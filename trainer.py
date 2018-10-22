@@ -81,17 +81,11 @@ if __name__ == '__main__':
 
   # Parse arguments
   args, _ = parser.parse_known_args()
-  if args.dataset:
-    dataset_name = 'dataset.' + args.dataset
-  else:
-    dataset_name = 'dataset'
-  dataset_module = importlib.import_module(dataset_name)
+  dataset_module = importlib.import_module('datasets.' + args.dataset
+                                           if args.dataset else 'datasets')
   dataset_module.update_argparser(parser)
-  if args.model:
-    model_name = 'model.' + args.model
-  else:
-    model_name = 'model'
-  model_module = importlib.import_module(model_name)
+  model_module = importlib.import_module('models.' + args.model
+                                         if args.model else 'models')
   model_module.update_argparser(parser)
   hparams = parser.parse_args()
   print(hparams)

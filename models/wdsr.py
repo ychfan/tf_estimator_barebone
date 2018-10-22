@@ -1,4 +1,4 @@
-"""EDSR model for DIV2K dataset
+"""WDSR model for DIV2K dataset
 """
 
 from __future__ import absolute_import
@@ -7,11 +7,12 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-import model
+from common.layers import conv2d_weight_norm
+import models
 
 
 def update_argparser(parser):
-  model.update_argparser(parser)
+  models.update_argparser(parser)
   args, _ = parser.parse_known_args()
   if args.dataset == 'div2k':
     parser.add_argument(
@@ -22,11 +23,12 @@ def update_argparser(parser):
     parser.add_argument(
         '--num-residual-units',
         help='Number of residual units in networks',
-        default=64,
+        default=32,
         type=int)
     parser.set_defaults(
-        train_steps=1500000,
-        learning_rate=((1000000,), (1e-4, 5e-5)),
+        train_steps=2000000,
+        learning_rate=((1500000, 1700000, 1800000, 1900000), (1e-3, 5e-4, 2e-4,
+                                                              1e-4, 5e-5)),
         save_checkpoints_steps=50000,
         save_summary_steps=10000,
     )
@@ -43,19 +45,19 @@ def model_fn(features, labels, mode, params, config):
 
   lr = features['source']
 
-  def _edsr(x):
+  def _wdsr(x):
 
     def _residual_block(x, num_channels):
       skip = x
-      x = tf.layers.conv2d(
+      x = conv2d_weight_norm(
           x,
-          num_channels,
+          num_channels * 4,
           3,
           padding='same',
           name='conv0',
       )
       x = tf.nn.relu(x)
-      x = tf.layers.conv2d(
+      x = conv2d_weight_norm(
           x,
           num_channels,
           3,
@@ -68,7 +70,7 @@ def model_fn(features, labels, mode, params, config):
                         kernel_size,
                         num_channels=params.num_channels,
                         scale=params.scale):
-      x = tf.layers.conv2d(
+      x = conv2d_weight_norm(
           x,
           num_channels * scale * scale,
           kernel_size,
@@ -82,7 +84,7 @@ def model_fn(features, labels, mode, params, config):
     with tf.variable_scope('skip'):
       skip = _subpixel_block(x, 5)
     with tf.variable_scope('input'):
-      x = tf.layers.conv2d(
+      x = conv2d_weight_norm(
           x,
           params.num_residual_units,
           3,
@@ -97,7 +99,7 @@ def model_fn(features, labels, mode, params, config):
     x = x + MEAN
     return x
 
-  sr = _edsr(lr)
+  sr = _wdsr(lr)
 
   predictions = tf.clip_by_value(sr, 0.0, 1.0)
 

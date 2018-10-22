@@ -7,11 +7,11 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-import model
+import models
 
 
 def update_argparser(parser):
-  model.update_argparser(parser)
+  models.update_argparser(parser)
   args, _ = parser.parse_known_args()
   if args.dataset == 'cifar10':
     parser.add_argument(

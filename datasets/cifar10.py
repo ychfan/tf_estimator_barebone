@@ -6,6 +6,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import sys
 from six.moves import cPickle
 from six.moves import urllib
 import tarfile
@@ -13,7 +14,7 @@ import numpy as np
 
 import tensorflow as tf
 
-import dataset
+import datasets
 
 REMOTE_URL = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
 LOCAL_DIR = os.path.join('data/cifar10/')
@@ -27,7 +28,7 @@ NUM_CLASSES = 10
 
 
 def update_argparser(parser):
-  dataset.update_argparser(parser)
+  datasets.update_argparser(parser)
   parser.set_defaults(
       num_classes=NUM_CLASSES,
       train_batch_size=128,
@@ -58,7 +59,10 @@ def _extract(mode, params):
 
   for batch in batches:
     with open('%s%s%s' % (LOCAL_DIR, DATA_DIR, batch), 'rb') as fo:
-      entry = cPickle.load(fo, encoding='latin1')
+      if sys.version_info[0] < 3:
+        entry = cPickle.load(fo)
+      else:
+        entry = cPickle.load(fo, encoding='latin1')
       images = np.array(entry['data'])
       labels = np.array(entry['labels'])
 
@@ -123,4 +127,4 @@ def _transform(dataset, mode, params):
 
 
 input_fn = lambda mode, params: (
-    dataset.input_fn_tplt(mode, params, extract=_extract, transform=_transform))
+    datasets.input_fn_tplt(mode, params, extract=_extract, transform=_transform))
