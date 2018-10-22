@@ -79,15 +79,8 @@ if __name__ == '__main__':
       default='INFO',
       help='Set logging verbosity')
 
+  # Parse arguments
   args, _ = parser.parse_known_args()
-
-  # Set python level verbosity
-  tf.logging.set_verbosity(args.verbosity)
-  # Set C++ Graph Execution level verbosity
-  os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(
-      tf.logging.__dict__[args.verbosity] / 10)
-
-  # Run the training job
   if args.dataset:
     dataset_name = 'dataset.' + args.dataset
   else:
@@ -103,6 +96,13 @@ if __name__ == '__main__':
   hparams = parser.parse_args()
   print(hparams)
 
+  # Set python level verbosity
+  tf.logging.set_verbosity(hparams.verbosity)
+  # Set C++ Graph Execution level verbosity
+  os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(
+      tf.logging.__dict__[hparams.verbosity] / 10)
+
+  # Run the training job
   model_fn = getattr(model_module, 'model_fn')
   input_fn = getattr(dataset_module, 'input_fn')
   train_input_fn = lambda: input_fn(
@@ -116,7 +116,7 @@ if __name__ == '__main__':
   predict_input_fn = getattr(dataset_module, 'predict_input_fn', None)
 
   session_config = tf.ConfigProto()
-  session_config.gpu_options.allow_growth = args.allow_growth
+  session_config.gpu_options.allow_growth = hparams.allow_growth
   if hparams.xla:
     session_config.graph_options.optimizer_options.global_jit_level = (
         tf.OptimizerOptions.ON_1)
