@@ -78,9 +78,7 @@ def _transform(dataset, mode, params):
 
 def _load(dataset, mode, params):
   dataset = dataset.prefetch(params.prefetch_buffer_size)
-  iterator = dataset.make_one_shot_iterator()
-  features, labels = iterator.get_next()
-  return features, labels
+  return dataset
 
 
 def input_fn_tplt(mode,
