@@ -58,6 +58,12 @@ if __name__ == '__main__':
       type=int)
   # Performance tuning parameters
   parser.add_argument(
+      '--num-gpus',
+      help='Number of GPUs for experiments',
+      default=1,
+      type=int,
+  )
+  parser.add_argument(
       '--allow-growth',
       help='Whether to enable allow_growth in GPU_Options',
       default=False,
@@ -110,16 +116,27 @@ if __name__ == '__main__':
   predict_input_fn = getattr(dataset_module, 'predict_input_fn', None)
 
   session_config = tf.ConfigProto()
+  session_config.allow_soft_placement = True
   session_config.gpu_options.allow_growth = hparams.allow_growth
   if hparams.xla:
     session_config.graph_options.optimizer_options.global_jit_level = (
         tf.OptimizerOptions.ON_1)
+  if hparams.num_gpus > 1:
+    distribution = tf.contrib.distribute.MirroredStrategy(
+        num_gpus=hparams.num_gpus)
+    distribute_config = tf.contrib.distribute.DistributeConfig(
+        train_distribute=distribution,
+        eval_distribute=distribution,
+    )
+  else:
+    distribute_config = None
   run_config = tf.estimator.RunConfig(
       model_dir=hparams.job_dir,
       tf_random_seed=hparams.random_seed,
       save_summary_steps=hparams.save_summary_steps,
       save_checkpoints_steps=hparams.save_checkpoints_steps,
       session_config=session_config,
+      experimental_distribute=distribute_config,
   )
   estimator = tf.estimator.Estimator(
       model_fn=model_fn,
