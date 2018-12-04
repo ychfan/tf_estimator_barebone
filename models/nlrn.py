@@ -133,7 +133,7 @@ def _nlrn(x, mode, params):
       x, params.num_filters, 3, padding='same', activation=None, name='conv1')
   y = x
   with tf.variable_scope("rnn"):
-    for i in range(params.num_blocks):
+    for i in range(params.num_steps):
       if i == 0:
         x = _residual_block(
             x, y, params.num_filters, training, name='RB1', reuse=False)
