@@ -23,7 +23,7 @@ def update_argparser(parser):
   parser.add_argument(
       '--noise-sigma',
       help='Scale for image super-resolution',
-      default=15,
+      default=25,
       type=float)
   parser.add_argument(
       '--train-patch-size',
@@ -90,7 +90,7 @@ def _transform(dataset, mode, params):
       target = tf.image.random_crop(
           target, [params.train_patch_size, params.train_patch_size, 1])
       target = tf.image.random_flip_left_right(target)
-      target = tf.image.flip_up_down(target)
+      target = tf.image.random_flip_up_down(target)
       pred = tf.less(
           tf.random_uniform(shape=[], minval=0., maxval=1., dtype=tf.float32),
           0.5)
@@ -152,7 +152,7 @@ def test_saved_model():
   parser.add_argument(
       '--noise-sigma',
       help='Scale for image super-resolution',
-      default=15,
+      default=25,
       type=float)
   parser.add_argument(
       '--patch-size',
@@ -171,7 +171,7 @@ def test_saved_model():
     output_tensor = sess.graph.get_tensor_by_name(
         signature_def.outputs['output'].name)
     if not os.path.isdir(args.output_dir):
-      os.mkdir(args.output_dir)
+      os.makedirs(args.output_dir)
     psnr_list = []
     for input_file in os.listdir(args.input_dir):
       print(input_file)
@@ -188,7 +188,7 @@ def test_saved_model():
         images = output_tensor.eval(feed_dict={input_tensor: images})
         return images
 
-      stride = 5
+      stride = 7
       h_idx_list = list(
           range(0, input_image.shape[0] - args.patch_size,
                 stride)) + [input_image.shape[0] - args.patch_size]
@@ -220,6 +220,7 @@ def test_saved_model():
         diff = np.abs(im1_uint8 - im2_uint8).flatten()
         rmse = np.sqrt(np.mean(np.square(diff)))
         psnr = 20 * np.log10(255.0 / rmse)
+        print(psnr)
         return psnr
 
       psnr_list.append(psnr(output_image, input_image))
