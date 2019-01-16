@@ -29,7 +29,7 @@ python incremental_trainer.py --dataset denoise --train-flist data/bsd500/flist1
 ```
 #### Pre-trained models
 Noise level (sigma): [15](https://github.com/Ding-Liu/NLRN/files/2674584/sigma15.zip) [25](https://github.com/Ding-Liu/NLRN/files/2674585/sigma25.zip) [50](https://github.com/Ding-Liu/NLRN/files/2674586/sigma50.zip)
-#### Prediction on Set12 Set12 and BSD68
+#### Prediction on Set12 and BSD68
 ```
 python -m datasets.denoise --noise-sigma SIGMA --model-dir MODEL_DIR --input-dir data/denoise/testsets/Set12 --output-dir ./output/Set12
 python -m datasets.denoise --noise-sigma SIGMA --model-dir MODEL_DIR --input-dir data/denoise/testsets/BSD68 --output-dir ./output/BSD68
