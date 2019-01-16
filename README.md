@@ -1,6 +1,6 @@
 # Non-Local Recurrent Network for Image Restoration
 
-[Paper](https://arxiv.org/abs/1806.02919) | [Bibtex](#Bibtex)
+[Paper](http://papers.nips.cc/paper/7439-non-local-recurrent-network-for-image-restoration.pdf) | [Bibtex](#Bibtex)
 
 WIP: fast evaluation with custom ops
 
@@ -45,10 +45,11 @@ wget -O data/SR_testing_datasets.zip http://vllab.ucmerced.edu/wlai24/LapSRN/res
 
 ## Bibtex
 ```
-@article{liu2018non,
+@inproceedings{liu2018non,
   title={Non-Local Recurrent Network for Image Restoration},
   author={Liu, Ding and Wen, Bihan and Fan, Yuchen and Loy, Chen Change and Huang, Thomas S},
-  journal={arXiv preprint arXiv:1806.02919},
+  booktitle={Advances in Neural Information Processing Systems},
+  pages={1680--1689},
   year={2018}
 }
 ```
