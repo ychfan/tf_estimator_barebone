@@ -4,6 +4,8 @@
 
 WIP: fast evaluation with custom ops
 
+An older version of the NLRN code can be found [here](https://github.com/Ding-Liu/NLRN_v0).
+
 ## Usage
 ### Denoising
 #### Preparing BSD500 for training
