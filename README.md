@@ -30,7 +30,9 @@ python trainer.py --dataset denoise --train-flist data/bsd500/flist1/train.flist
 python incremental_trainer.py --dataset denoise --train-flist data/bsd500/flist1/train.flist --eval-flist data/bsd500/flist1/eval.flist --model nlrn --job-dir debug
 ```
 #### Pre-trained models
-Noise level (sigma): [15](https://github.com/Ding-Liu/NLRN/files/2674584/sigma15.zip) [25](https://github.com/Ding-Liu/NLRN/files/2674585/sigma25.zip) [50](https://github.com/Ding-Liu/NLRN/files/2674586/sigma50.zip)
+12 recurrent states/with correlation propagation: [sigma 15](https://drive.google.com/open?id=1cbaLYjPn_H6TRbLPfA6B3j45TmKdUrfa), [sigma 25](https://drive.google.com/open?id=1l_G9wniOKSM4dS8NqGP-SptPVT5PFo6l), [sigma 50](https://drive.google.com/open?id=1UlDZLSb0a-1fpMgi_LRWozpRsOfWIMek).
+
+15 recurrent states/without correlation propagation: [sigma 15](https://github.com/Ding-Liu/NLRN/files/2674584/sigma15.zip), [sigma 25](https://github.com/Ding-Liu/NLRN/files/2674585/sigma25.zip), [sigma 50](https://github.com/Ding-Liu/NLRN/files/2674586/sigma50.zip).
 #### Prediction on Set12 and BSD68
 ```
 python -m datasets.denoise --noise-sigma SIGMA --model-dir MODEL_DIR --input-dir data/denoise/testsets/Set12 --output-dir ./output/Set12
