@@ -1,4 +1,4 @@
-# Non-Local Recurrent Network for Image Restoration
+# Non-Local Recurrent Network for Image Restoration (NeurIPS 2018)
 
 [Paper](http://papers.nips.cc/paper/7439-non-local-recurrent-network-for-image-restoration.pdf) | [Bibtex](#Bibtex)
 
